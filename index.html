@@ -3,11 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人网站</title>
+    <title>Telalit 的小站</title>
+    <style>
+        body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.8; }
+        h1 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    </style>
 </head>
 <body>
-    <h1>你好，世界！</h1>
-    <p>如果你看到这段文字，说明网站部署成功了。</p>
-    <p>这是通过 GitHub Pages 托管的第一个页面。</p>
+    <h1>Telalit 的小站</h1>
+    <div id="content">加载中...</div>
+    
+    <!-- 引入 Markdown 解析器 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // 自动加载 posts/hello-world.md 并显示
+        fetch('posts/hello-world.md')
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('content').innerHTML = marked.parse(text);
+            })
+            .catch(err => {
+                document.getElementById('content').innerHTML = '还没有内容，去写一篇吧！';
+            });
+    </script>
 </body>
 </html>
