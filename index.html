@@ -6,212 +6,90 @@
   <title>My Site · 个人主页</title>
   
   <style>
-    /* ============================================================
-       一、全局变量与基础样式
-       ============================================================ */
     :root {
-      --bg: #f4f1ea;          /* 页面背景颜色 */
-      --text: #22201c;        /* 主文字颜色 */
-      --accent-1: #5b7fff;    /* 重点色一：绿光时的渐变终点 */
-      --accent-2: #ff8e6e;    /* 重点色二 */
-      --text-muted: #97907f;  /* 减淡文字颜色 */
-      
-      --max-width: 1000px;    /* 全站最大内容宽度 */
-      --radius-lg: 32px;      /* 大圆角 */
-      
-      /* 发光相关变量（新增） */
-      --glow-color: rgba(91, 127, 255, 0.8); /* 默认发光颜色，带透明度 */
-      --glow-spread: 15px;                   /* 默认发光范围/模糊度 */
+      --bg: #f4f1ea;          
+      --text: #22201c;        
+      --accent-1: #5b7fff;    
+      --accent-2: #ff8e6e;    
+      --text-muted: #97907f;  
+      --max-width: 1000px;    
+      --radius-lg: 32px;      
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { overflow-x: hidden; }
-
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
-      line-height: 1.6;
-      transition: background .3s ease, color .3s ease;
+      line-height: 1.6; transition: background .3s ease, color .3s ease;
     }
 
-    /* ============================================================
-       二、Hero 悬浮色块
-       ============================================================ */
     .hero {
-      position: relative;
-      margin: 24px;
-      min-height: 62vh;
-      border-radius: var(--radius-lg);
+      position: relative; margin: 24px; min-height: 62vh; border-radius: var(--radius-lg);
       background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-      display: flex;
-      align-items: flex-end;
-      transition: background .3s ease;
+      display: flex; align-items: flex-end; transition: background .3s ease;
     }
+    .hero-content { padding: 48px; color: #fff; }
+    .site-name { font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 800; letter-spacing: .02em; }
+    .dash { display: block; margin: 10px 0 6px; font-size: 1.4rem; opacity: .85; }
+    .quote { font-size: .95rem; opacity: .8; max-width: 34em; transition: all 0.3s ease; }
 
-    .hero-content {
-      padding: 48px;
-      color: #fff;
-    }
-
-    .site-name {
-      font-size: clamp(2.2rem, 6vw, 3.5rem);
-      font-weight: 800;
-      letter-spacing: .02em;
-    }
-
-    .dash {
-      display: block;
-      margin: 10px 0 6px;
-      font-size: 1.4rem;
-      opacity: .85;
-    }
-
-    /* 动态引语基础样式 */
-    .quote {
-      font-size: .95rem;
-      opacity: .8;
-      max-width: 34em;
-      transition: all 0.3s ease;
-    }
-
-    /* ★ 引语静态渐变发光效果（从左到右：黑 -> 重点色一） */
+    /* 渐变与发光特效 */
     .quote.glow {
-      font-weight: 700;
-      opacity: 1; /* 发光时不需要减淡 */
-      background: linear-gradient(to right, #000000 0%, var(--accent-1) 100%);
+      font-weight: 800; 
+      font-size: 1.1rem; 
+      opacity: 1; 
+      background: linear-gradient(to right, #111111 10%, var(--local-glow-color, #22c55e) 90%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      /* 使用 drop-shadow 让透明的文字产生发光效果，亮度由变量控制 */
-      filter: drop-shadow(0 0 var(--glow-spread) var(--glow-color));
+      filter: 
+        drop-shadow(0 0 var(--local-glow-inner, 3px) var(--local-glow-color, #22c55e)) 
+        drop-shadow(0 0 var(--local-glow-outer, 12px) var(--local-glow-color, #22c55e));
     }
 
-    /* Hero 右上角按钮 */
     .color-btn {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(255, 255, 255, .25);
-      backdrop-filter: blur(6px);
-      cursor: pointer;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; top: 24px; right: 24px; width: 48px; height: 48px;
+      border-radius: 50%; border: none; background: rgba(255, 255, 255, .25);
+      backdrop-filter: blur(6px); cursor: pointer; color: #fff;
+      display: flex; align-items: center; justify-content: center;
       transition: background .2s ease, transform .2s ease;
     }
     .color-btn:hover { background: rgba(255, 255, 255, .45); transform: rotate(30deg); }
     .color-btn svg { width: 22px; height: 22px; }
-
-    /* ============================================================
-       三、主内容区
-       ============================================================ */
-    .container {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 0 24px 64px;
-    }
-
-    .divider {
-      border: none;
-      border-top: 1px solid rgba(0, 0, 0, .12);
-      margin-bottom: 40px;
-    }
-
-    .nav-desc {
-      color: var(--text-muted);
-      font-size: .95rem;
-      margin-bottom: 24px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-
+    
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px 64px; }
+    .divider { border: none; border-top: 1px solid rgba(0, 0, 0, .12); margin-bottom: 40px; }
+    .nav-desc { color: var(--text-muted); font-size: .95rem; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      text-decoration: none;
-      color: var(--text);
-      padding: 32px 16px;
-      border-radius: 20px;
-      transition: background .2s ease, transform .2s ease;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      text-decoration: none; color: var(--text); padding: 32px 16px;
+      border-radius: 20px; transition: background .2s ease, transform .2s ease;
     }
     .card:hover { background: rgba(0, 0, 0, .05); transform: translateY(-4px); }
-
     .card-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      margin-bottom: 14px;
-      transition: background .3s ease;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; margin-bottom: 14px; transition: background .3s ease;
     }
     .card-icon svg { width: 28px; height: 28px; }
-    
     .card-text { font-size: 1rem; font-weight: 600; }
 
-    /* ============================================================
-       四、颜色设置面板
-       ============================================================ */
     .popup {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      width: 280px;
-      max-width: calc(100vw - 48px);
-      background: #fff;
-      border-radius: 24px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
-      padding: 24px;
-      z-index: 100;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-8px);
-      transition: opacity .2s ease, transform .2s ease, visibility .2s;
+      position: fixed; top: 24px; right: 24px; width: 280px; max-width: calc(100vw - 48px);
+      background: #fff; border-radius: 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+      padding: 24px; z-index: 100; opacity: 0; visibility: hidden;
+      transform: translateY(-8px); transition: opacity .2s ease, transform .2s ease, visibility .2s;
     }
     .popup.open { opacity: 1; visibility: visible; transform: translateY(0); }
     .popup h2 { font-size: 1rem; margin-bottom: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-
-    .color-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
-      font-size: .9rem;
-    }
+    .color-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: .9rem; }
     .color-row input[type="color"] {
-      width: 40px;
-      height: 28px;
-      border: none;
-      border-radius: 8px;
-      background: none;
-      cursor: pointer;
-      padding: 0;
-    }
-    
-    /* ★ 新增：滑块样式 */
-    .color-row input[type="range"] {
-      width: 100px;
-      cursor: pointer;
+      width: 40px; height: 28px; border: none; border-radius: 8px; background: none; cursor: pointer; padding: 0;
     }
 
-    /* ============================================================
-       五、响应式
-       ============================================================ */
     @media (max-width: 768px) {
       .hero { margin: 12px; min-height: 55vh; }
       .hero-content { padding: 28px; }
@@ -221,7 +99,6 @@
     }
   </style>
 
-  <!-- Lucide 图标 CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -234,68 +111,44 @@
     </div>
     
     <button class="color-btn" id="colorBtn" aria-label="颜色设置" title="颜色设置">
-      <i data-lucide="settings"></i> <!-- 改成了更直观的齿轮图标 -->
+      <i data-lucide="settings"></i>
     </button>
   </header>
 
   <main class="container">
     <hr class="divider">
     <p class="nav-desc">这里是我的个人角落，随便逛逛：</p>
-    
     <nav class="grid">
-      <a class="card" href="#articles">
-        <span class="card-icon"><i data-lucide="file-text"></i></span>
-        <span class="card-text">博客文章</span>
-      </a>
-      <a class="card" href="#projects">
-        <span class="card-icon"><i data-lucide="code"></i></span>
-        <span class="card-text">项目作品</span>
-      </a>
-      <a class="card" href="#about">
-        <span class="card-icon"><i data-lucide="user"></i></span>
-        <span class="card-text">关于我</span>
-      </a>
+      <a class="card" href="#articles"><span class="card-icon"><i data-lucide="file-text"></i></span><span class="card-text">博客文章</span></a>
+      <a class="card" href="#projects"><span class="card-icon"><i data-lucide="code"></i></span><span class="card-text">项目作品</span></a>
+      <a class="card" href="#about"><span class="card-icon"><i data-lucide="user"></i></span><span class="card-text">关于我</span></a>
     </nav>
   </main>
 
-  <!-- 颜色设置面板 -->
   <div class="popup" id="colorPopup" role="dialog" aria-label="颜色设置">
     <h2>视觉设置</h2>
-    <div class="color-row">
-      <label for="pickBg">背景颜色</label>
-      <input type="color" id="pickBg" data-var="--bg">
-    </div>
-    <div class="color-row">
-      <label for="pickA1">重点色一</label>
-      <input type="color" id="pickA1" data-var="--accent-1">
-    </div>
-    <div class="color-row">
-      <label for="pickA2">重点色二</label>
-      <input type="color" id="pickA2" data-var="--accent-2">
-    </div>
-    <div class="color-row">
-      <label for="pickMuted">减淡文字</label>
-      <input type="color" id="pickMuted" data-var="--text-muted">
-    </div>
-    <!-- 新增：发光强度控制 -->
-    <div class="color-row" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px;">
-      <label for="pickGlow">发光强度</label>
-      <input type="range" id="pickGlow" min="0" max="30" value="15" data-var="--glow-spread" data-unit="px">
-    </div>
+    <div class="color-row"><label for="pickBg">背景颜色</label><input type="color" id="pickBg" data-var="--bg"></div>
+    <div class="color-row"><label for="pickA1">重点色一</label><input type="color" id="pickA1" data-var="--accent-1"></div>
+    <div class="color-row"><label for="pickA2">重点色二</label><input type="color" id="pickA2" data-var="--accent-2"></div>
+    <div class="color-row"><label for="pickMuted">减淡文字</label><input type="color" id="pickMuted" data-var="--text-muted"></div>
   </div>
 
   <script>
     /* ============================================================
-       【引语配置区】★ 以后修改引语，只动这个数组即可 ★
-       1. text: 引语内容
-       2. weight: 抽中权重（只对普通引语生效，越大越容易中）
-       3. conditionDate: 特定日期（如 '12-25' 或 ['02-14', '12-25']）
-       4. conditionFn: 自定义函数条件（如返回 true 则必定触发）
-       5. glow: 设为 true 时，引语会呈现渐变发光效果
+       【引语配置区】
+       配置项说明：
+       text          : 引语文本
+       weight        : 抽取权重 (仅普通引语生效)
+       conditionDate : 触发日期 (格式 'MM-DD'，支持数组)
+       conditionFn   : 触发条件函数 (返回 true 触发)
+       glow          : 是否开启渐变发光
+       glowColor     : 自定义发光颜色 (如 '#ff003c')
+       glowInner     : 内层光晕半径 (如 '3px')
+       glowOuter     : 外层光晕半径 (如 '12px')
        ============================================================ */
-    const quoteConfig = [
+  const quoteConfig = [
   /* ---- 特殊日期 / 条件引语（命中即必定显示）---- */
-  { conditionDate: ['02-14','11-25','12-25'],glow: true, text: '我好嫉妒啊......' },
+  { conditionDate: ['02-14','12-25'],glow: true, text: '我好嫉妒啊......' },
   { conditionDate: '10-01', text: '祝Gavi生日快乐（笑）' },
 
   /* ---- 默认引语（按 weight 加权随机，权重可自行调整）---- */
@@ -306,21 +159,19 @@
   { weight: 3,  text: '来自于正太控L' },
 ];
 
-
-    /* ---------------- 引语抽取与渲染逻辑（无需改动） ---------------- */
+    /* 引语抽取逻辑 */
     function pickQuote() {
       const now = new Date();
       const today = String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-
-      // 1. 优先检查特殊条件
       const special = quoteConfig.find(item => 
         (item.conditionDate ? [].concat(item.conditionDate).includes(today) : false) || 
         (item.conditionFn && item.conditionFn())
       );
       if (special) return special;
 
-      // 2. 权重抽奖池
       const defaults = quoteConfig.filter(item => typeof item.weight === 'number');
+      if (defaults.length === 0) return { text: "暂无引语" };
+
       const total = defaults.reduce((sum, item) => sum + item.weight, 0);
       let roll = Math.random() * total;
       for (const item of defaults) {
@@ -330,47 +181,38 @@
       return defaults[defaults.length - 1]; 
     }
 
+    /* 渲染并注入自定义特效参数 */
     (function renderQuote() {
       const q = pickQuote();
       const quoteEl = document.getElementById('quote');
       quoteEl.textContent = q.text + (q.from ? '  ' + q.from : '');
-      // 如果配置里写了 glow: true，则加上发光类
-      if (q.glow) quoteEl.classList.add('glow');
+      
+      if (q.glow) {
+        quoteEl.classList.add('glow');
+        if (q.glowColor) quoteEl.style.setProperty('--local-glow-color', q.glowColor);
+        if (q.glowInner) quoteEl.style.setProperty('--local-glow-inner', q.glowInner);
+        if (q.glowOuter) quoteEl.style.setProperty('--local-glow-outer', q.glowOuter);
+      }
     })();
 
-    /* ============================================================
-       颜色与面板设置逻辑
-       ============================================================ */
+    /* 颜色设置面板逻辑 */
     const STORAGE_KEY = 'site-visual-settings';
     const colorBtn    = document.getElementById('colorBtn');
     const colorPopup  = document.getElementById('colorPopup');
     const inputs      = document.querySelectorAll('#colorPopup input');
 
-    // 初始化加载用户保存的配置
     (function initSettings() {
       let saved = null;
       try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
-      
       inputs.forEach(input => {
         const cssVar = input.dataset.var;
-        const unit = input.dataset.unit || ''; // 获取单位（如 px）
-        
-        if (saved && saved[cssVar] !== undefined) {
-          // 应用保存的值
-          document.documentElement.style.setProperty(cssVar, saved[cssVar] + unit);
-          // 更新输入框的显示值（如果是 range，需要去掉单位转成数字）
-          input.value = input.type === 'range' ? parseInt(saved[cssVar]) : saved[cssVar];
-        } else {
-          // 如果是第一次加载，读取默认的 CSS 变量值给输入框
-          if (input.type === 'range') {
-            const rootVal = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
-            input.value = parseInt(rootVal) || 15;
-          }
+        if (saved && saved[cssVar]) {
+          document.documentElement.style.setProperty(cssVar, saved[cssVar]);
+          input.value = saved[cssVar];
         }
       });
     })();
 
-    // 开关面板逻辑
     function openPopup()  { colorPopup.classList.add('open'); }
     function closePopup() { colorPopup.classList.remove('open'); }
 
@@ -379,7 +221,6 @@
       colorPopup.classList.contains('open') ? closePopup() : openPopup();
     });
 
-    // 点击外部或按 Esc 关闭
     document.addEventListener('click', (e) => {
       if (!colorPopup.contains(e.target) && e.target !== colorBtn) closePopup();
     });
@@ -387,26 +228,17 @@
       if (e.key === 'Escape') closePopup();
     });
 
-    // 监听输入框变化，实时生效并保存
     inputs.forEach(input => {
-      // 对于颜色用 input 事件，对于滑块也用 input 事件
       input.addEventListener('input', () => {
         const cssVar = input.dataset.var;
-        const unit = input.dataset.unit || '';
-        const val = input.value + unit;
-        
-        // 实时修改 CSS 变量
-        document.documentElement.style.setProperty(cssVar, val);
-        
-        // 保存到 localStorage
+        document.documentElement.style.setProperty(cssVar, input.value);
         let saved = {};
         try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
-        saved[cssVar] = input.value; // 存纯值，方便下次读取
+        saved[cssVar] = input.value; 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
       });
     });
 
-    // 渲染 Lucide 图标
     lucide.createIcons();
   </script>
 </body>
