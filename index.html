@@ -300,25 +300,6 @@ body {
 <script>
 /* ============================================================
    【引语配置区】★ 想改引语，只动下面这个数组 ★
-
-   每条配置支持 4 种写法（可自由组合）：
-
-   ① 普通默认引语（参与加权随机）：
-     { weight: 90, text: '引语文案' }
-
-   ② 特殊日期引语（到那天必定显示，优先于加权随机）：
-     { conditionDate: '01-01', text: '新年好！' }
-     —— 格式是 'MM-DD'，月、日都要两位数字
-
-   ③ 自定义条件引语（函数返回 true 时必定显示）：
-     { conditionFn: () => new Date().getDay() === 0, text: '今天是周日' }
-
-   ④ 带出处（可选，会显示在引语后面）：
-     from: '—— 某人'
-
-   ★ 增加一条新引语：在数组里复制一行，改 text 即可。
-   ★ 修改出现概率：改 weight 数字（比如 90 和 1 ≈ 90% 与 1%）。
-   ★ 设定特殊日期：给某条加 conditionDate: 'MM-DD'。
    ============================================================ */
 const quoteConfig = [
   /* ---- 特殊日期 / 条件引语（命中即必定显示）---- */
@@ -367,83 +348,21 @@ function pickQuote() {
     q.text + (q.from ? '  ' + q.from : '');
 })();
 
-/* ============================================================
-   颜色设置面板逻辑
-   ============================================================ */
-const STORAGE_KEY = 'site-colors';   // localStorage 的键名
-const colorBtn    = document.getElementById('colorBtn');
-const colorPopup  = document.getElementById('colorPopup');
-const pickers     = document.querySelectorAll('#colorPopup input[type="color"]');
-
-/* 加载时：优先读取 localStorage 里的自定义颜色，覆盖 :root 默认值 */
-(function initColors() {
-  let saved = null;
-  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
-  pickers.forEach(picker => {
-    const cssVar = picker.dataset.var;   // 形如 "--bg"
-    if (saved && saved[cssVar]) {
-      document.documentElement.style.setProperty(cssVar, saved[cssVar]);
-      picker.value = saved[cssVar];      // 选择器同步显示当前值
-    }
-  });
-})();
-
-/* 打开 / 关闭面板 */
-function openPopup()  { colorPopup.classList.add('open'); }
-function closePopup() { colorPopup.classList.remove('open'); }
-
-colorBtn.addEventListener('click', (e) => {
-  e.stopPropagation();                 // 防止立刻触发"点击外部关闭"
-  colorPopup.classList.contains('open') ? closePopup() : openPopup();
-});
-
-/* 点击面板外部 → 关闭 */
-document.addEventListener('click', (e) => {
-  if (!colorPopup.contains(e.target) && e.target !== colorBtn) closePopup();
-});
-
-/* 按 Esc → 关闭 */
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closePopup();
-});
-
-/* 拖动颜色选择器时：实时更新 :root 变量并写入 localStorage */
-pickers.forEach(picker => {
-  picker.addEventListener('input', () => {
-    const cssVar = picker.dataset.var;
-    document.documentElement.style.setProperty(cssVar, picker.value);
-
-    // 读取旧存档 → 合并本次修改 → 存回（不覆盖其他未改的颜色）
-    let saved = {};
-    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
-    saved[cssVar] = picker.value;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-  });
-});
-
-/* ============================================================
-   Lucide 图标：把 data-lucide 占位元素替换为 SVG
-   必须放在所有 DOM 渲染完成之后调用
-   ============================================================ */
-lucide.createIcons();
-</script>
-</body>
-</html>/* ---------------- 引语抽取与渲染逻辑（一般无需改动） ---------------- */
+/* ---------------- 引语抽取与渲染逻辑 ---------------- */
 function pickQuote() {
   const now = new Date();
-  // 拼出今天的 'MM-DD'，用于匹配 conditionDate
   const today = String(now.getMonth() + 1).padStart(2, '0')
               + '-'
               + String(now.getDate()).padStart(2, '0');
 
-  // 第一优先级：命中特殊条件（日期或自定义函数）的配置，必定显示
   const special = quoteConfig.find(item =>
-    (item.conditionDate && item.conditionDate === today) ||
+    (item.conditionDate
+      ? [].concat(item.conditionDate).includes(today)
+      : false) ||
     (item.conditionFn && item.conditionFn())
   );
   if (special) return special;
 
-  // 第二优先级：按 weight 加权随机抽取默认引语
   const defaults = quoteConfig.filter(item => typeof item.weight === 'number');
   const total = defaults.reduce((sum, item) => sum + item.weight, 0);
   let roll = Math.random() * total;
@@ -451,71 +370,65 @@ function pickQuote() {
     roll -= item.weight;
     if (roll < 0) return item;
   }
-  return defaults[defaults.length - 1]; // 兜底，正常不会走到
+  return defaults[defaults.length - 1];
 }
 
 (function renderQuote() {
   const q = pickQuote();
   const quoteEl = document.getElementById('quote');
   quoteEl.textContent = q.text + (q.from ? '  ' + q.from : '');
-  if (q.glow) quoteEl.classList.add('glow');   // 命中发光配置时加特效
+  if (q.glow) quoteEl.classList.add('glow');
 })();
 
 /* ============================================================
    颜色设置面板逻辑
    ============================================================ */
-const STORAGE_KEY = 'site-colors';   // localStorage 的键名
+const STORAGE_KEY = 'site-colors';
 const colorBtn    = document.getElementById('colorBtn');
 const colorPopup  = document.getElementById('colorPopup');
 const pickers     = document.querySelectorAll('#colorPopup input[type="color"]');
 
-/* 加载时：优先读取 localStorage 里的自定义颜色，覆盖 :root 默认值 */
 (function initColors() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
   pickers.forEach(picker => {
-    const cssVar = picker.dataset.var;   // 形如 "--bg"
+    const cssVar = picker.dataset.var;
     if (saved && saved[cssVar]) {
       document.documentElement.style.setProperty(cssVar, saved[cssVar]);
-      picker.value = saved[cssVar];      // 选择器同步显示当前值
+      picker.value = saved[cssVar];
     }
   });
 })();
 
-/* 打开 / 关闭面板 */
 function openPopup()  { colorPopup.classList.add('open'); }
 function closePopup() { colorPopup.classList.remove('open'); }
 
 colorBtn.addEventListener('click', (e) => {
-  e.stopPropagation();                 // 防止立刻触发"点击外部关闭"
+  e.stopPropagation();
   colorPopup.classList.contains('open') ? closePopup() : openPopup();
 });
 
-/* 点击面板外部 → 关闭 */
 document.addEventListener('click', (e) => {
   if (!colorPopup.contains(e.target) && e.target !== colorBtn) closePopup();
 });
 
-/* 按 Esc → 关闭 */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePopup();
 });
 
-/* 拖动颜色选择器时：实时更新 :root 变量并写入 localStorage */
 pickers.forEach(picker => {
   picker.addEventListener('input', () => {
     const cssVar = picker.dataset.var;
     document.documentElement.style.setProperty(cssVar, picker.value);
-
-    // 读取旧存档 → 合并本次修改 → 存回（不覆盖其他未改的颜色）
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
     saved[cssVar] = picker.value;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
   });
 });
-</script>
-   /* Lucide 图标：把 data-lucide 占位元素替换为 SVG */
+
+/* Lucide 图标：把 data-lucide 占位元素替换为 SVG */
 lucide.createIcons();
+</script>
 </body>
 </html>
