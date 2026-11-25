@@ -6,6 +6,10 @@
 <title>My Site · 个人主页</title>
 
 <style>
+   </style>
+<!-- Lucide 图标 CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
 /* ============================================================
    一、全局变量与基础样式
    以后想换默认配色：直接改下面这几行即可（localStorage 里
@@ -215,8 +219,9 @@ body {
     <span class="dash">——</span>
     <p class="quote" id="quote"></p>
   </div>
-  <button class="color-btn" id="colorBtn" aria-label="颜色设置" title="颜色设置">⚙</button>
-</header>
+ <button class="color-btn" id="colorBtn" aria-label="颜色设置" title="颜色设置">
+  <i data-lucide="palette"></i>
+</button>
 
 <!-- ==========================================================
      区块 2：主内容（细线 / 导航说明 / Grid）
@@ -294,7 +299,7 @@ const quoteConfig = [
   { conditionDate: '08-05', text: '祝Gavi生日快乐（笑）' },
 
   /* ---- 默认引语（按 weight 加权随机，权重可自行调整）---- */
-  { weight: 90, text: '来自于L' },
+  { weight: 70, text: '来自于L' },
   { weight: 5, text: '来自于弱智L' },
   { weight: 5, text: '来自于海洋生物L' },
   { weight: 5, text: '来自于夜晚的孩子L' },
@@ -387,5 +392,7 @@ pickers.forEach(picker => {
   });
 });
 </script>
+   /* Lucide 图标：把 data-lucide 占位元素替换为 SVG */
+lucide.createIcons();
 </body>
 </html>
