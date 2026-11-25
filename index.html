@@ -35,19 +35,17 @@
     .quote { font-size: .95rem; opacity: .8; max-width: 34em; transition: all 0.3s ease; }
 
     /* 渐变与发光特效 */
-    .quote.glow {
-      font-weight: 800; 
-      font-size: 1.1rem; 
-      opacity: 1; 
-      background: linear-gradient(to right, #111111 10%, var(--local-glow-color, #22c55e) 90%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      filter: 
-        drop-shadow(0 0 var(--local-glow-inner, 3px) var(--local-glow-color, #22c55e)) 
-        drop-shadow(0 0 var(--local-glow-outer, 12px) var(--local-glow-color, #22c55e));
-    }
-
+   .quote.glow {
+  font-weight: 800; 
+  font-size: 1.1rem; 
+  opacity: 1; 
+  
+  color: var(--local-glow-color, #22c55e);
+  
+  filter: 
+    drop-shadow(0 0 var(--local-glow-inner, 3px) var(--local-glow-color, #22c55e)) 
+    drop-shadow(0 0 var(--local-glow-outer, 12px) var(--local-glow-color, #22c55e));
+}
     .color-btn {
       position: absolute; top: 24px; right: 24px; width: 48px; height: 48px;
       border-radius: 50%; border: none; background: rgba(255, 255, 255, .25);
