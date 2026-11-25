@@ -6,9 +6,6 @@
 <title>My Site · 个人主页</title>
 
 <style>
-<!-- Lucide 图标 CDN -->
-<script src="https://unpkg.com/lucide@latest"></script>
-</head>
 /* ============================================================
    一、全局变量与基础样式
    以后想换默认配色：直接改下面这几行即可（localStorage 里
@@ -88,12 +85,17 @@ body {
   border: none;
   background: rgba(255, 255, 255, .25);
   backdrop-filter: blur(6px);
-  font-size: 20px;
   cursor: pointer;
   color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background .2s ease, transform .2s ease;
 }
 .color-btn:hover { background: rgba(255, 255, 255, .45); transform: rotate(30deg); }
+
+/* Lucide 图标尺寸（替换后的 SVG 默认 24×24，这里统一控制） */
+.color-btn svg { width: 22px; height: 22px; }
 
 /* ============================================================
    三、主内容区：细线 + 导航说明 + Grid 网格
@@ -205,7 +207,32 @@ body {
   .grid { grid-template-columns: 1fr; }       /* 单列 */
   .popup { top: 12px; right: 12px; }          /* 面板贴边内缩，防溢出 */
 }
+
+/* ============================================================
+   六、特殊引语：渐变发光效果
+   配合 JS 中 glow: true 的配置项使用
+   ============================================================ */
+.quote.glow {
+  font-weight: 700;
+  background: linear-gradient(90deg, #ffd76e, #ff9d6e, #ff6ec7, #ffd76e);
+  background-size: 300% 100%;         /* 背景加宽，为流动动画做准备 */
+  -webkit-background-clip: text;      /* 背景裁剪成文字形状 */
+  background-clip: text;
+  color: transparent;                 /* 文字透明，露出背景渐变 */
+  animation: glow-flow 4s linear infinite;  /* 渐变流动动画 */
+  filter: drop-shadow(0 0 8px rgba(255, 200, 120, .6));  /* 发光光晕 */
+}
+
+/* 渐变背景位置移动 → 产生流动感 */
+@keyframes glow-flow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+   
 </style>
+
+<!-- Lucide 图标 CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
@@ -218,9 +245,10 @@ body {
     <span class="dash">——</span>
     <p class="quote" id="quote"></p>
   </div>
- <button class="color-btn" id="colorBtn" aria-label="颜色设置" title="颜色设置">
-  <i data-lucide="palette"></i>
-</button>
+  <button class="color-btn" id="colorBtn" aria-label="颜色设置" title="颜色设置">
+    <i data-lucide="palette"></i>
+  </button>
+</header>
 
 <!-- ==========================================================
      区块 2：主内容（细线 / 导航说明 / Grid）
@@ -294,18 +322,113 @@ body {
    ============================================================ */
 const quoteConfig = [
   /* ---- 特殊日期 / 条件引语（命中即必定显示）---- */
-  { conditionDate: '12-25', text: '我好嫉妒啊......' },
-  { conditionDate: '08-05', text: '祝Gavi生日快乐（笑）' },
+  { conditionDate: ['02-14','12-25'],glow: true, text: '我好嫉妒啊......' },
+  { conditionDate: '10-01', text: '祝Gavi生日快乐（笑）' },
 
   /* ---- 默认引语（按 weight 加权随机，权重可自行调整）---- */
-  { weight: 70, text: '来自于L' },
-  { weight: 5, text: '来自于弱智L' },
-  { weight: 5, text: '来自于海洋生物L' },
-  { weight: 5, text: '来自于夜晚的孩子L' },
-  { weight: 1,  text: '来自于正太控L' },
+  { weight: 80, text: '来自于L' },
+  { weight: 10, text: '来自于海洋生物L' },
+  { weight: 10, text: '来自于弱智L。' },
+  { weight: 10, text: '来自于夜晚的孩子L' },
+  { weight: 3,  text: '来自于正太控L' },
 ];
 
 /* ---------------- 引语抽取与渲染逻辑（一般无需改动） ---------------- */
+function pickQuote() {
+  const now = new Date();
+  // 拼出今天的 'MM-DD'，用于匹配 conditionDate
+  const today = String(now.getMonth() + 1).padStart(2, '0')
+              + '-'
+              + String(now.getDate()).padStart(2, '0');
+
+  // 第一优先级：命中特殊条件（日期或自定义函数）的配置，必定显示
+  const special = quoteConfig.find(item =>
+   (item.conditionDate
+    ? [].concat(item.conditionDate).includes(today)   // 支持字符串或数组
+    : false) ||
+    (item.conditionFn && item.conditionFn())
+  );
+  if (special) return special;
+
+  // 第二优先级：按 weight 加权随机抽取默认引语
+  const defaults = quoteConfig.filter(item => typeof item.weight === 'number');
+  const total = defaults.reduce((sum, item) => sum + item.weight, 0);
+  let roll = Math.random() * total;
+  for (const item of defaults) {
+    roll -= item.weight;
+    if (roll < 0) return item;
+  }
+  return defaults[defaults.length - 1]; // 兜底，正常不会走到
+}
+
+(function renderQuote() {
+  const q = pickQuote();
+  document.getElementById('quote').textContent =
+    q.text + (q.from ? '  ' + q.from : '');
+})();
+
+/* ============================================================
+   颜色设置面板逻辑
+   ============================================================ */
+const STORAGE_KEY = 'site-colors';   // localStorage 的键名
+const colorBtn    = document.getElementById('colorBtn');
+const colorPopup  = document.getElementById('colorPopup');
+const pickers     = document.querySelectorAll('#colorPopup input[type="color"]');
+
+/* 加载时：优先读取 localStorage 里的自定义颜色，覆盖 :root 默认值 */
+(function initColors() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
+  pickers.forEach(picker => {
+    const cssVar = picker.dataset.var;   // 形如 "--bg"
+    if (saved && saved[cssVar]) {
+      document.documentElement.style.setProperty(cssVar, saved[cssVar]);
+      picker.value = saved[cssVar];      // 选择器同步显示当前值
+    }
+  });
+})();
+
+/* 打开 / 关闭面板 */
+function openPopup()  { colorPopup.classList.add('open'); }
+function closePopup() { colorPopup.classList.remove('open'); }
+
+colorBtn.addEventListener('click', (e) => {
+  e.stopPropagation();                 // 防止立刻触发"点击外部关闭"
+  colorPopup.classList.contains('open') ? closePopup() : openPopup();
+});
+
+/* 点击面板外部 → 关闭 */
+document.addEventListener('click', (e) => {
+  if (!colorPopup.contains(e.target) && e.target !== colorBtn) closePopup();
+});
+
+/* 按 Esc → 关闭 */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePopup();
+});
+
+/* 拖动颜色选择器时：实时更新 :root 变量并写入 localStorage */
+pickers.forEach(picker => {
+  picker.addEventListener('input', () => {
+    const cssVar = picker.dataset.var;
+    document.documentElement.style.setProperty(cssVar, picker.value);
+
+    // 读取旧存档 → 合并本次修改 → 存回（不覆盖其他未改的颜色）
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
+    saved[cssVar] = picker.value;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  });
+});
+
+/* ============================================================
+   Lucide 图标：把 data-lucide 占位元素替换为 SVG
+   必须放在所有 DOM 渲染完成之后调用
+   ============================================================ */
+lucide.createIcons();
+</script>
+</body>
+</html>/* ---------------- 引语抽取与渲染逻辑（一般无需改动） ---------------- */
 function pickQuote() {
   const now = new Date();
   // 拼出今天的 'MM-DD'，用于匹配 conditionDate
@@ -333,8 +456,9 @@ function pickQuote() {
 
 (function renderQuote() {
   const q = pickQuote();
-  document.getElementById('quote').textContent =
-    q.text + (q.from ? '  ' + q.from : '');
+  const quoteEl = document.getElementById('quote');
+  quoteEl.textContent = q.text + (q.from ? '  ' + q.from : '');
+  if (q.glow) quoteEl.classList.add('glow');   // 命中发光配置时加特效
 })();
 
 /* ============================================================
